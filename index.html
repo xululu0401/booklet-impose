@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>折手账 · 小册子拼版与装订对账台</title>
+<style id="printStyleHost">
+:root{
+  --ink:#1b2733; --muted:#5c6b7a; --line:#dbe3ea; --line2:#eef3f7; --bg:#f4f7f9; --card:#fff;
+  --accent:#b4442c; --accent-soft:#fbeeea; --accent2:#2c6e9b; --accent2-soft:#eaf2f8;
+  --ok:#2f7a52; --warn:#a9741b; --blank:#9aa7b4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:700;line-height:1.3}
+a{color:var(--accent2)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 64px}
+header.top{padding:6px 0 16px;border-bottom:1px solid var(--line);margin-bottom:18px}
+header.top h1{font-size:26px;letter-spacing:.5px}
+header.top h1 span{color:var(--accent)}
+header.top p{margin:8px 0 0;color:var(--muted);font-size:15px;max-width:760px}
+.meta{margin-top:10px;color:var(--muted);font-size:12.5px}
+.app{display:grid;grid-template-columns:344px minmax(0,1fr);gap:18px;align-items:start}
+.app>*{min-width:0}
+@media (max-width:980px){.app{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 16px 18px;margin-bottom:16px}
+.card>h2{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card>h2 .tag{font-weight:500;font-size:12px;color:var(--muted);background:var(--line2);border-radius:999px;padding:2px 9px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 10px}
+aside.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain}
+@media (max-width:980px){aside.panel{position:static;max-height:none;overflow:visible}}
+.field{margin-bottom:12px}
+.field>label{display:block;font-size:13.5px;font-weight:600;margin-bottom:5px}
+.field .sub{font-weight:400;color:var(--muted);font-size:12px}
+input[type=text],input[type=number],select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit}
+input:focus,select:focus{outline:2px solid var(--accent2-soft);border-color:var(--accent2)}
+input.bad{border-color:var(--accent);background:var(--accent-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:620px){.row2{grid-template-columns:1fr}}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer;background:#fff}
+.seg input{accent-color:var(--accent)}
+.seg label.on{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+button{font:inherit;font-size:14px;padding:8px 13px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.ghost{background:var(--line2)}
+button:hover{border-color:var(--accent2)}
+#errors{display:none;margin:0 0 12px;padding:10px 12px;border:1px solid #e3b8ac;background:var(--accent-soft);border-radius:10px;font-size:13.5px;color:#7d2d19}
+#errors.on{display:block}
+#errors ul{margin:6px 0 0;padding-left:18px}
+.headline{font-size:17px;line-height:1.75}
+.headline b{color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 4px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--line2);border-radius:10px;padding:10px 12px}
+.kpi .k{font-size:12.5px;color:var(--muted)}
+.kpi .v{font-size:21px;font-weight:700;white-space:nowrap}
+.kpi .u{font-size:12px;color:var(--muted);font-weight:400}
+.kpi.hi{background:var(--accent-soft)}
+.kpi.hi .v{color:var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;background:#fff}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+th{background:var(--line2);font-weight:600;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.fixed{table-layout:fixed}
+td.blank{color:var(--blank);font-style:italic}
+tbody tr:last-child td{border-bottom:0}
+tr.sighead td{background:#f7fafc;font-weight:600;color:var(--muted)}
+table td.pose{white-space:nowrap}
+table td.note{white-space:normal;min-width:190px}
+.legend{color:var(--muted);font-size:12.5px;margin-top:8px}
+.sheetbox{display:flex;flex-wrap:wrap;gap:12px}
+.sheet{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px}
+.sheet h4{margin:0 0 8px;font-size:13px;color:var(--muted);font-weight:600}
+.paper{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid #b9c6d1;border-radius:6px;overflow:hidden;background:#fff}
+.paper .cell{padding:10px 6px;text-align:center;font-variant-numeric:tabular-nums;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.paper .cell .n{font-size:19px;font-weight:700}
+.paper .cell .t{font-size:11px;color:var(--muted)}
+.paper .cell.bl{color:var(--blank);background:repeating-linear-gradient(45deg,#fafcfd,#fafcfd 6px,#f1f5f8 6px,#f1f5f8 12px)}
+.paper .cell.bl .n{font-size:13px;font-weight:600;font-style:italic}
+.paper .fold{position:absolute;left:50%;top:0;bottom:0;width:0;border-left:1.5px dashed #c8d3dc}
+.paper .spine{position:absolute;left:50%;top:0;bottom:0;width:0;border-left:3px double #9fb0be}
+.facecap{font-size:12px;color:var(--muted);margin:6px 0 0;text-align:center}
+.advice{margin:0;padding-left:18px}
+.advice li{margin-bottom:7px}
+.advice li::marker{color:var(--accent)}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;font-size:13px}
+.check{display:flex;gap:7px;align-items:flex-start;padding:6px 9px;border-radius:8px;background:var(--line2)}
+.check .dot{flex:0 0 auto;font-weight:700}
+.check.ok .dot{color:var(--ok)}
+.check.no{background:var(--accent-soft)}
+.check.no .dot{color:var(--accent)}
+.limits{font-size:13.5px;color:var(--muted)}
+.limits li{margin-bottom:6px}
+.footnote{color:var(--muted);font-size:12.5px;margin-top:10px}
+.pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent2-soft);color:var(--accent2);margin-left:6px}
+.printonly{display:none}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:#22303c;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+#toast.on{opacity:1}
+@media (max-width:620px){
+  .wrap{padding:14px 12px 56px}
+  header.top h1{font-size:22px}
+  .kpi .v{font-size:19px}
+  .card{padding:13px 12px 15px}
+  .paper .cell .n{font-size:17px}
+}
+@media (max-width:345px){
+  .kpi .v{font-size:17px}
+  .headline{font-size:16px}
+}
+@media print{
+  body{background:#fff}
+  .wrap>header.top,.app>aside.panel,.noprint{display:none!important}
+  .app{display:block}
+  .printonly{display:block}
+  .card{border:0;padding:0;margin:0}
+  .pcard{page-break-after:always;padding:6mm 0}
+  .pcard .ptitle{font-size:12px;color:#555;margin:0 0 3mm}
+  .psheet{display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;height:120mm}
+  .psheet div{display:flex;align-items:center;justify-content:center;font-size:34pt;font-weight:700;border:1px dashed #bbb}
+}
+</style>
+<style id="printStyle"></style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>折手账 · <span>小册子拼版与装订对账台</span></h1>
+  <p>想自己印一本小册子：哪一页印在哪张纸的哪一面、要几张纸、页数不够时白页落在哪、纸厚了内页要不要朝书脊挪几毫米、厚到要分几帖——按对折一次的折手规则算清，并给出可以直接照做的拼版表与打印设置。</p>
+  <div class="meta">纯前端单文件，不联网、不上传；纸张厚度、单价与页数全部由你填写。默认样例与内置场景都是虚构示例。</div>
+</header>
+
+<div class="app">
+  <aside class="panel">
+    <form class="card" id="form" autocomplete="off">
+      <h2>① 输入<span class="tag">改哪一项都立即重算 · 侧栏可在栏内上下滚动</span></h2>
+      <div class="field">
+        <label>成品总页数 <span class="sub">封面封底也算在内，第 1 页是封面</span></label>
+        <input type="text" id="pages" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>纸张规格 <span class="sub">一律横向使用、沿中线对折</span></label>
+        <select id="paper">
+          <option value="A4">A4（297×210 → 成品 148.5×210）</option>
+          <option value="A3">A3（420×297 → 成品 210×297）</option>
+          <option value="B5">B5（250×176 → 成品 125×176）</option>
+          <option value="Letter">Letter（279.4×215.9）</option>
+          <option value="custom">自定义</option>
+        </select>
+      </div>
+      <div class="row2" id="customRow" hidden>
+        <div class="field"><label>纸宽 mm</label><input type="text" id="customW" inputmode="decimal"></div>
+        <div class="field"><label>纸高 mm</label><input type="text" id="customH" inputmode="decimal"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>纸张厚度 mm</label><input type="text" id="thickness" inputmode="decimal"></div>
+        <div class="field"><label>每张纸单价 元</label><input type="text" id="sheetPrice" inputmode="decimal"></div>
+      </div>
+      <div class="field">
+        <label>装订方式 <span class="sub">骑马钉才需要折手拼版</span></label>
+        <div class="seg" id="bindingSeg">
+          <label><input type="radio" name="binding" value="saddle">骑马钉</label>
+          <label><input type="radio" name="binding" value="perfect">胶装</label>
+          <label><input type="radio" name="binding" value="coil">圈装</label>
+        </div>
+      </div>
+      <div id="saddleOnly">
+        <div class="row2">
+          <div class="field"><label>每帖上限 页 <span class="sub">4 的倍数</span></label><input type="text" id="perSig" inputmode="numeric"></div>
+          <div class="field"><label>层厚系数</label>
+            <select id="layer">
+              <option value="2">2（对折后前口两层）</option>
+              <option value="1">1（保守取一层）</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>爬移补偿</label>
+          <div class="seg" id="creepSeg">
+            <label><input type="checkbox" id="creep">按表逐张内移（不裁）</label>
+          </div>
+        </div>
+      </div>
+      <div class="btns">
+        <button type="button" class="primary" id="btnReset">恢复默认</button>
+        <button type="button" id="btnSave">保存到本机</button>
+        <button type="button" id="btnLoad">读取上次</button>
+      </div>
+      <div class="footnote" id="saveState">本机保存只存在这个浏览器里。</div>
+    </form>
+
+    <div class="card noprint">
+      <h2>内置场景<span class="tag">虚构示例</span></h2>
+      <div class="field" style="margin:0">
+        <select id="scenario"></select>
+      </div>
+      <div class="footnote">场景只填入输入，所有数字都由同一套已验算的计算重新算出。</div>
+    </div>
+
+    <div class="card noprint">
+      <h2>拿走结果</h2>
+      <div class="btns">
+        <button type="button" id="btnCsv">CSV</button>
+        <button type="button" id="btnMd">Markdown</button>
+        <button type="button" id="btnJson">JSON 备份</button>
+        <button type="button" id="btnPng">结果卡 PNG</button>
+      </div>
+      <div class="btns" style="margin-top:8px">
+        <button type="button" id="btnPrint">打印视图</button>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)">
+          <input type="checkbox" id="printFaces" checked> 打印视图含第 2 面
+        </label>
+      </div>
+      <div class="footnote">打印视图是真实可 Ctrl+P 的拼版页；实际出纸效果未在本页验证，请先试印一张对折自检。</div>
+    </div>
+  </aside>
+
+  <main class="results">
+    <div id="errors"></div>
+
+    <section class="card noprint" id="resHeadline">
+      <h2>② 结论<span class="tag" id="bindingTag">骑马钉</span></h2>
+      <div class="headline" id="headline"></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="footnote" id="sizeNote"></div>
+    </section>
+
+    <section class="card noprint" id="resSheets">
+      <h2>③ 拼版表<span class="tag" id="sheetTag"></span></h2>
+      <p class="hint" id="sheetHint"></p>
+      <div class="tw">
+        <table id="sheetTable"></table>
+      </div>
+      <div class="legend" id="sheetLegend"></div>
+    </section>
+
+    <section class="card noprint" id="resDiagram">
+      <h2>④ 纸面示意<span class="tag">照这个放页码</span></h2>
+      <p class="hint">虚线是折线（书脊）。第 2 面是翻面后的视角：左右方向对调、上下不变。</p>
+      <div class="sheetbox" id="diagram"></div>
+      <div class="legend" id="diagramNote"></div>
+    </section>
+
+    <section class="card noprint" id="resBinding">
+      <h2>⑤ 装订方式对照<span class="tag">换方式会怎样</span></h2>
+      <div class="tw"><table id="bindingTable"></table></div>
+      <div class="legend">三种方式的页数约束、用纸张数与书脊厚度都按同一份输入重算；「当前」是你选的那一种。窄屏下表格可左右滑动看全列。</div>
+    </section>
+
+    <section class="card noprint" id="resChecklist">
+      <h2>⑥ 打印与装订清单<span class="tag">照着做</span></h2>
+      <ol id="checklist"></ol>
+    </section>
+
+    <section class="card noprint" id="resAdvice">
+      <h2>⑦ 该注意什么</h2>
+      <ul class="advice" id="advice"></ul>
+    </section>
+
+    <section class="card noprint" id="resCheck">
+      <h2>⑧ 结构自检<span class="tag">每次重算都跑</span></h2>
+      <div class="checks" id="checks"></div>
+      <div class="footnote" id="checkNote"></div>
+    </section>
+
+    <section class="card noprint" id="resSens">
+      <h2>⑨ 敏感性<span class="tag">换一个条件会怎样</span></h2>
+      <div class="tw"><table id="sensTable"></table></div>
+      <div class="legend">每一行都是用同一套公式把改动后的输入完整重算一遍，不是按比例估的。窄屏下表格可左右滑动看全列。</div>
+    </section>
+
+    <section class="card noprint" id="resLimits">
+      <h2>⑩ 边界与不算的情形</h2>
+      <ul class="limits" id="limits"></ul>
+    </section>
+
+    <section class="card printonly" id="printArea"></section>
+  </main>
+</div>
+</div>
+<div id="toast"></div>
+<script>/* 折手账（booklet-impose）· 核心计算
+ * 纯函数，无 DOM：拼版页序（闭式公式）、分帖划分（DP）、爬移补偿（线性模型）、
+ * 装订方式对照、结构自检、敏感性与成本。
+ * window.AppCore（浏览器）/ module.exports（Node 测试）
+ */
+'use strict';
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.AppCore = api;
+})(typeof self !== 'undefined' ? self : this, function () {
+
+  /* ── 常量 ────────────────────────────────────────────── */
+
+  // 纸张尺寸 mm（横向使用的宽 × 高）
+  const PAPERS = {
+    A4: { key: 'A4', name: 'A4', w: 297, h: 210 },
+    A3: { key: 'A3', name: 'A3', w: 420, h: 297 },
+    B5: { key: 'B5', name: 'B5', w: 250, h: 176 },
+    Letter: { key: 'Letter', name: 'Letter', w: 279.4, h: 215.9 },
+    custom: { key: 'custom', name: '自定义', w: null, h: null }
+  };
+
+  const BINDINGS = {
+    saddle: {
+      key: 'saddle', name: '骑马钉', short: '折手 · 每面 2 页',
+      foldable: true, flat: true, pagesStep: 4,
+      note: '页数要 4 的倍数；内页会在前口拱出来（爬移）'
+    },
+    perfect: {
+      key: 'perfect', name: '胶装', short: '顺序 · 每面 1 页',
+      foldable: false, flat: false, pagesStep: 2,
+      note: '页数任意；不能平摊（跨页会丢内容），三边要裁'
+    },
+    coil: {
+      key: 'coil', name: '圈装', short: '顺序 · 每面 1 页',
+      foldable: false, flat: true, pagesStep: 2,
+      note: '页数任意；能平摊，要给打孔留边距'
+    }
+  };
+
+  const LIMITS = {
+    pages: { min: 1, max: 400, int: true },
+    customW: { min: 50, max: 1000 },
+    customH: { min: 50, max: 1000 },
+    thickness: { min: 0.02, max: 1.0 },
+    perSig: { min: 8, max: 200, int: true },
+    sheetPrice: { min: 0, max: 1000 },
+    layer: { min: 1, max: 2, int: true }
+  };
+
+  const defaults = {
+    pages: '20',
+    paper: 'A4',
+    customW: '210',
+    customH: '297',
+    thickness: '0.10',
+    perSig: '32',
+    binding: 'saddle',
+    creep: true,
+    layer: 2,
+    sheetPrice: '0.50'
+  };
+
+  /* ── 数字解析与校验 ──────────────────────────────────── */
+
+  const FULLWIDTH = '０１２３４５６７８９．';
+
+  function toHalfWidth(s) {
+    return String(s).replace(/[０-９．]/g, (ch) => {
+      const i = FULLWIDTH.indexOf(ch);
+      if (i < 0) return ch;
+      return i === 10 ? '.' : String(i);
+    });
+  }
+
+  function parseNum(raw, opt) {
+    const o = opt || {};
+    const name = o.name || '数值';
+    if (raw === undefined || raw === null) return { ok: false, error: name + '不能为空' };
+    let s = toHalfWidth(String(raw)).trim().replace(/[,\s，]/g, '');
+    if (s === '') return { ok: false, error: name + '不能为空' };
+    if (!/^-?\d*(\.\d*)?$/.test(s)) return { ok: false, error: name + '不是数字：' + String(raw).slice(0, 20) };
+    const v = Number(s);
+    if (!Number.isFinite(v)) return { ok: false, error: name + '不是有限数字' };
+    if (o.int && Math.abs(v - Math.round(v)) > 1e-9) return { ok: false, error: name + '必须是整数' };
+    if (o.min !== undefined && v < o.min) return { ok: false, error: name + '不能小于 ' + o.min };
+    if (o.max !== undefined && v > o.max) return { ok: false, error: name + '不能大于 ' + o.max };
+    const dp = o.dp === undefined ? 6 : o.dp;
+    const rounded = Math.round(v * Math.pow(10, dp)) / Math.pow(10, dp);
+    return { ok: true, value: rounded };
+  }
+
+  function normalize(input) {
+    const raw = Object.assign({}, defaults, input || {});
+    const errors = [];
+    const cfg = {};
+
+    const p = parseNum(raw.pages, { name: '总页数', int: true, min: LIMITS.pages.min, max: LIMITS.pages.max });
+    if (!p.ok) errors.push(p.error); else cfg.pages = p.value;
+
+    if (!PAPERS[raw.paper]) errors.push('纸张规格不认识：' + String(raw.paper).slice(0, 12));
+    else cfg.paperKey = raw.paper;
+
+    if (!BINDINGS[raw.binding]) errors.push('装订方式不认识：' + String(raw.binding).slice(0, 12));
+    else cfg.binding = raw.binding;
+
+    if (cfg.paperKey === 'custom') {
+      const w = parseNum(raw.customW, { name: '自定义纸宽', min: LIMITS.customW.min, max: LIMITS.customW.max, dp: 2 });
+      const h = parseNum(raw.customH, { name: '自定义纸高', min: LIMITS.customH.min, max: LIMITS.customH.max, dp: 2 });
+      if (!w.ok) errors.push(w.error);
+      if (!h.ok) errors.push(h.error);
+      if (w.ok && h.ok) {
+        if (h.value > w.value) errors.push('自定义纸张要横向使用：纸高不能大于纸宽（当前 ' + h.value + ' > ' + w.value + '）');
+        else cfg.paper = { key: 'custom', name: '自定义', w: w.value, h: h.value };
+      } else cfg.paper = { key: 'custom', name: '自定义', w: null, h: null };
+    } else if (cfg.paperKey) {
+      cfg.paper = Object.assign({}, PAPERS[cfg.paperKey]);
+    }
+
+    const t = parseNum(raw.thickness, { name: '纸张厚度', min: LIMITS.thickness.min, max: LIMITS.thickness.max, dp: 3 });
+    if (!t.ok) errors.push(t.error); else cfg.thickness = t.value;
+
+    const s = parseNum(raw.perSig, { name: '每帖上限', int: true, min: LIMITS.perSig.min, max: LIMITS.perSig.max });
+    if (!s.ok) errors.push(s.error);
+    else if (s.value % 4 !== 0) errors.push('每帖上限必须是 4 的倍数（当前 ' + s.value + ' 页）');
+    else cfg.perSig = s.value;
+
+    const l = parseNum(raw.layer, { name: '层厚系数', int: true, min: LIMITS.layer.min, max: LIMITS.layer.max });
+    if (!l.ok) errors.push(l.error);
+    else if (l.value !== 1 && l.value !== 2) errors.push('层厚系数只能是 1（单层）或 2（对折后两层）');
+    else cfg.layer = l.value;
+
+    const price = parseNum(raw.sheetPrice, { name: '每张纸单价', min: LIMITS.sheetPrice.min, max: LIMITS.sheetPrice.max, dp: 4 });
+    if (!price.ok) errors.push(price.error); else cfg.sheetPrice = price.value;
+
+    cfg.creep = raw.creep === true || raw.creep === 'true' || raw.creep === 1 || raw.creep === '1';
+
+    // 骑马钉必须 4 的倍数；胶装 / 圈装每面 1 页，补齐到偶数
+    if (!errors.length) {
+      const step = BINDINGS[cfg.binding].pagesStep;
+      cfg.padded = Math.ceil(cfg.pages / step) * step;
+      cfg.blanks = cfg.padded - cfg.pages;
+    }
+    return { ok: errors.length === 0, cfg: errors.length ? null : cfg, errors };
+  }
+
+  /* ── 分帖划分：DP 求「帖数最少 → 最大帖最小 → 摊得最平 → 厚的在前」 ── */
+
+  function partsBetter(a, b) {
+    if (!b) return true;
+    const ma = Math.max.apply(null, a), mb = Math.max.apply(null, b);
+    if (ma !== mb) return ma < mb;
+    const sa = ma - Math.min.apply(null, a), sb = mb - Math.min.apply(null, b);
+    if (sa !== sb) return sa < sb;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] > b[i];
+    return false;
+  }
+
+  function splitSignatures(totalSheets, capSheets) {
+    if (totalSheets <= 0) return [];
+    const cap = Math.max(1, Math.floor(capSheets));
+    const k = Math.ceil(totalSheets / cap);
+    const memo = new Map();
+    function best(rest, sigs) {
+      if (sigs === 0) return rest === 0 ? [] : null;
+      if (rest < sigs || rest > sigs * cap) return null;
+      const key = rest + ':' + sigs;
+      if (memo.has(key)) return memo.get(key);
+      let out = null;
+      const lo = Math.max(1, rest - (sigs - 1) * cap);
+      const hi = Math.min(cap, rest - (sigs - 1));
+      for (let part = lo; part <= hi; part++) {
+        const tail = best(rest - part, sigs - 1);
+        if (!tail) continue;
+        const seq = [part].concat(tail);
+        if (partsBetter(seq, out)) out = seq;
+      }
+      memo.set(key, out);
+      return out;
+    }
+    return best(totalSheets, k) || [];
+  }
+
+  /* ── 拼版页序 ────────────────────────────────────────── */
+
+  // 骑马钉：对折一次，每面 2 页。第 k 张（1 = 最外）
+  //   第 1 面（先印）：左 N−2(k−1)，右 2k−1
+  //   第 2 面（翻面后，左右对调视角）：左 2k，右 N−2k+1
+  function imposeSignature(N) {
+    const m = N / 4;
+    const out = [];
+    for (let k = 1; k <= m; k++) {
+      out.push({
+        k: k, m: m,
+        face1: { left: N - 2 * (k - 1), right: 2 * k - 1 },
+        face2: { left: 2 * k, right: N - 2 * k + 1 }
+      });
+    }
+    return out;
+  }
+
+  // 胶装 / 圈装：不打折手，每面 1 页，双面顺序
+  function sequentialPose(padded) {
+    const m = Math.ceil(padded / 2);
+    const out = [];
+    for (let k = 1; k <= m; k++) {
+      out.push({ k: k, m: m, face1: { left: 2 * k - 1, right: null }, face2: { left: 2 * k, right: null } });
+    }
+    return out;
+  }
+
+  /* ── 爬移（线性模型） ────────────────────────────────── */
+
+  function creepModel(m, thickness, layer, creepOn) {
+    const L = Math.round((layer * thickness) * 1000) / 1000;
+    // 第 k 张（1 = 最外）内移 (k−1)·L：内张前口突出得多、被切掉得多，所以越往里越要朝书脊挪
+    const shiftOf = (k) => (creepOn ? Math.round((k - 1) * L * 1000) / 1000 : 0);
+    return {
+      L: L,
+      perLayerNote: layer === 2 ? '对折后前口两层' : '单层（保守取一层）',
+      shiftOf: shiftOf,
+      maxShift: shiftOn(m, L, creepOn),
+      protrude: Math.round((m - 1) * L * 1000) / 1000,
+      trim: Math.round((m - 1) * L * 1000) / 1000,
+      spine: Math.round(m * L * 1000) / 1000
+    };
+  }
+  function shiftOn(m, L, on) { return on ? Math.round((m - 1) * L * 1000) / 1000 : 0; }
+
+  /* ── 主分析 ──────────────────────────────────────────── */
+
+  function analyze(cfg) {
+    const B = BINDINGS[cfg.binding];
+    const padded = cfg.padded;
+    const blankSet = new Set();
+    for (let p = cfg.pages + 1; p <= padded; p++) blankSet.add(p);
+
+    const sheets = [];      // 逐张明细
+    const signatures = [];  // 分帖信息
+    let sheetCount = 0;
+
+    if (B.foldable) {
+      const totalSheets = padded / 4;
+      const parts = splitSignatures(totalSheets, cfg.perSig / 4);
+      let cursor = 1;
+      parts.forEach((sheetsInSig, idx) => {
+        const size = sheetsInSig * 4;
+        const start = cursor, end = cursor + size - 1;
+        const local = imposeSignature(size);
+        const creep = creepModel(sheetsInSig, cfg.thickness, cfg.layer, cfg.creep);
+        const rows = local.map((row) => {
+          const mk = (v) => {
+            const g = start - 1 + v;
+            const blank = g > cfg.pages;
+            return { page: blank ? null : g, g: g, label: blank ? '空白' : String(g), blank: blank, rel: v };
+          };
+          return {
+            sig: idx + 1, k: row.k, m: row.m,
+            face1: { left: mk(row.face1.left), right: mk(row.face1.right) },
+            face2: { left: mk(row.face2.left), right: mk(row.face2.right) },
+            shift: creep.shiftOf(row.k)
+          };
+        });
+        signatures.push({
+          index: idx + 1, start: start, end: end, size: size,
+          sheets: sheetsInSig, rows: rows, creep: creep
+        });
+        rows.forEach((r) => sheets.push(r));
+        cursor = end + 1;
+      });
+      sheetCount = totalSheets;
+    } else {
+      const pose = sequentialPose(padded);
+      pose.forEach((row) => {
+        const mk = (v) => {
+          if (v === null || v === undefined) return { page: null, g: null, label: '—', blank: false, none: true, rel: null };
+          const blank = v > cfg.pages;
+          return { page: blank ? null : v, g: v, label: blank ? '空白' : String(v), blank: blank, rel: v };
+        };
+        sheets.push({
+          sig: 1, k: row.k, m: row.m,
+          face1: { left: mk(row.face1.left), right: { page: null, label: '（本面只印 1 页）', blank: false, none: true } },
+          face2: { left: mk(row.face2.left), right: { page: null, label: '（本面只印 1 页）', blank: false, none: true } },
+          shift: 0
+        });
+      });
+      signatures.push({
+        index: 1, start: 1, end: padded, size: padded, sheets: sheetCount = pose.length,
+        rows: sheets, creep: null
+      });
+    }
+
+    const spine = B.foldable
+      ? Math.round(sheetCount * cfg.layer * cfg.thickness * 1000) / 1000
+      : Math.round(sheetCount * cfg.thickness * 1000) / 1000;
+
+    const paper = cfg.paper || { w: null, h: null, name: '自定义' };
+    const finish = (paper.w && paper.h)
+      ? { w: Math.round((paper.w / 2) * 10) / 10, h: Math.round(paper.h * 10) / 10 }
+      : { w: null, h: null };
+
+    const res = {
+      batchName: '折手账',
+      binding: cfg.binding,
+      bindingName: B.name,
+      padded: padded,
+      pages: cfg.pages,
+      blanks: cfg.blanks,
+      blankPages: Array.from(blankSet),
+      sheetCount: sheetCount,
+      signatureCount: signatures.length,
+      signatures: signatures,
+      sheets: sheets,
+      faces: sheetCount * 2,
+      cost: Math.round(sheetCount * cfg.sheetPrice * 100) / 100,
+      spine: spine,
+      paper: { key: paper.key, name: paper.name, w: paper.w, h: paper.h },
+      finish: finish,
+      thickness: cfg.thickness,
+      layer: cfg.layer,
+      perSig: cfg.perSig,
+      creepOn: cfg.creep,
+      creep: B.foldable && signatures[0] ? signatures[0].creep : null,
+      headline: null,
+      bindingRows: null,
+      checklist: [],
+      advice: []
+    };
+
+    // 跨帖（多帖）时以「最厚一帖」为爬移口径，逐帖各自的内移量已在 rows 里
+    let maxShiftAll = 0, trimAll = 0;
+    signatures.forEach((s) => {
+      if (s.creep) { maxShiftAll = Math.max(maxShiftAll, s.creep.maxShift); trimAll = Math.max(trimAll, s.creep.trim); }
+    });
+    res.maxShiftAll = maxShiftAll;
+    res.trimAll = trimAll;
+
+    res.headline = buildHeadline(res, B);
+    res.bindingRows = buildBindingRows(cfg);
+    res.checklist = buildChecklist(res, B);
+    res.advice = buildAdvice(res, B, cfg);
+    res.sequence = B.foldable ? null : sheets.map((r) => ({ k: r.k, front: r.face1.left.label, back: r.face2.left.label }));
+    return res;
+  }
+
+  function buildHeadline(res, B) {
+    const parts = [];
+    if (B.foldable) {
+      parts.push('共 ' + res.sheetCount + ' 张纸' + (res.signatureCount > 1 ? '、' + res.signatureCount + ' 帖' : ''));
+      parts.push(res.blanks > 0 ? '要留 ' + res.blanks + ' 页空白' : '不用留空白页');
+      if (res.creep && res.creepOn && res.sheetCount > 1) {
+        parts.push('最内一张内容要朝书脊内移 ' + fmt(res.maxShiftAll, 2) + ' mm（按外张切齐要裁 ' + fmt(res.trimAll, 2) + ' mm）');
+      } else if (res.creep && res.sheetCount > 1) {
+        parts.push('爬移补偿已关闭：内张前口会比外张突出 ' + fmt(res.creep.protrude, 2) + ' mm');
+      }
+    } else {
+      parts.push('共 ' + res.sheetCount + ' 张纸（每面 1 页、双面顺序印）');
+      parts.push(res.blanks > 0 ? '最后一页留空' : '不多不少正好印完');
+      parts.push('书脊厚约 ' + fmt(res.spine, 2) + ' mm，' + (B.flat ? '可以平摊' : '不能平摊（跨页会丢内容）'));
+    }
+    return parts.join('；');
+  }
+
+  function buildBindingRows(cfg) {
+    const paper = cfg.paper || {};
+    const area = (paper.w && paper.h) ? paper.w * paper.h : null;
+    const rows = [];
+    Object.keys(BINDINGS).forEach((key) => {
+      const b = BINDINGS[key];
+      const padded = Math.ceil(cfg.pages / b.pagesStep) * b.pagesStep;
+      const sheets = key === 'saddle' ? padded / 4 : Math.ceil(padded / 2);
+      const spineMm = key === 'saddle'
+        ? Math.round(sheets * cfg.layer * cfg.thickness * 1000) / 1000
+        : Math.round(sheets * cfg.thickness * 1000) / 1000;
+      rows.push({
+        key: key, name: b.name, pose: b.short,
+        padded: padded, blanks: padded - cfg.pages, sheets: sheets,
+        spine: spineMm, flat: b.flat, foldable: b.foldable,
+        current: key === cfg.binding,
+        note: b.note
+      });
+    });
+    return rows;
+  }
+
+  function buildChecklist(res, B) {
+    const list = [];
+    if (B.foldable) {
+      list.push('打印：双面；翻面时保持上下方向不变、左右对调（有的驱动里叫「短边翻转」，命名各家不一，务必先试印一张自检）');
+      list.push('缩放选「实际大小 / 100%」，不要选「适应页面」；纸张方向选横向');
+      list.push('每面 1 页（本页已经排好拼版），不要再用驱动里的「小册子 / Booklet」功能，否则会排两次');
+      list.push('印完先对折一张自检：第 1 张展开应看到「1 | 2」对上「3 | 4」');
+      if (res.blanks > 0) list.push('末帖最后 ' + res.blanks + ' 页是空白，位置见拼版表里的「空白」');
+      if (res.sheetCount > 1) list.push('装订前按外张前口切齐：裁掉约 ' + fmt(res.trimAll, 2) + ' mm（或按表里的内移量逐张移位后不裁）');
+    } else {
+      list.push('打印：双面（本页按顺序排好，正面 ' + '2k−1' + '、反面 ' + '2k' + '）');
+      list.push('缩放选「实际大小 / 100%」；' + (B.flat ? '圈装要留打孔边距（约 8–12 mm）' : '胶装三边裁切后再上胶'));
+      list.push('印完按顺序叠齐，先翻一遍确认没有跳页');
+    }
+    return list;
+  }
+
+  function buildAdvice(res, B, cfg) {
+    const out = [];
+    if (B.foldable && res.sheetCount > 1) {
+      if (res.creepOn && res.trimAll >= 1) {
+        out.push({ kind: 'trim', text: '前口要裁掉 ' + fmt(res.trimAll, 2) + ' mm 才齐，留边距时把这点算进去（别把正文放到最外 5 mm）。' });
+      }
+      if (res.maxShiftAll >= 2) {
+        out.push({ kind: 'thin', text: '内移已经到 ' + fmt(res.maxShiftAll, 2) + ' mm（纸太厚或张数太多），换薄一点的纸会直接减小这个数。' });
+      }
+    }
+    if (B.foldable && res.signatureCount > 1) {
+      out.push({ kind: 'sig', text: '页数超过每帖上限，已拆成 ' + res.signatureCount + ' 帖（' + res.signatures.map((s) => s.size).join(' / ') + ' 页），每帖单独对折、按顺序叠放装订。' });
+    }
+    if (B.foldable && res.sheetCount > 1 && res.creepOn) {
+      out.push({ kind: 'shift', text: '要么按表里的内移量逐张移位（不用裁），要么全部不补偿、装订后按外张前口一次切齐 ' + fmt(res.trimAll, 2) + ' mm。两条路选一条，别都不做。' });
+    }
+    if (!B.foldable && !B.flat) {
+      out.push({ kind: 'flat', text: '胶装不能平摊：跨页的图或表会被书脊吃掉，跨页内容要留出装订边。' });
+    }
+    if (res.blanks > 0) {
+      out.push({ kind: 'blank', text: '多出来的 ' + res.blanks + ' 页是空白，可以拿来做扉页、版权页或留言页，位置见拼版表。' });
+    }
+    if (B.foldable && res.sheetCount >= 21) {
+      out.push({ kind: 'thick', text: '这一帖已有 ' + res.sheetCount + ' 张，骑马钉会鼓，建议把每帖上限调小一点分帖。' });
+    }
+    return out;
+  }
+
+  /* ── 结构自检（不重复实现公式，只查性质） ───────────── */
+
+  function verify(res, cfg) {
+    const checks = [];
+    const add = (name, ok, detail) => checks.push({ name: name, ok: !!ok, detail: detail || '' });
+    const labels = [];
+    res.sheets.forEach((r) => {
+      [r.face1.left, r.face1.right, r.face2.left, r.face2.right].forEach((c) => {
+        if (c && !c.none) labels.push(c.page === null ? 'B' : c.page);
+      });
+    });
+
+    if (BINDINGS[res.binding].foldable) {
+      // 每张纸 4 个面必须是 {2k−1, 2k, N−2k+1, N−2k+2}（帖内相对页码）
+      let setOk = true, leafOk = true, coverOk = true;
+      const sigBad = [];
+      res.signatures.forEach((sig) => {
+        const N = sig.size;
+        const seenRel = new Set();
+        let dup = false;
+        sig.rows.forEach((r) => {
+          const cells = [r.face1.left, r.face1.right, r.face2.left, r.face2.right];
+          const rel = cells.map((c) => (c.page === null ? c.rel : c.page - (sig.start - 1)));
+          const want = [2 * r.k - 1, 2 * r.k, N - 2 * r.k + 1, N - 2 * r.k + 2];
+          const got = rel.slice().sort((a, b) => a - b);
+          if (got.join(',') !== want.slice().sort((a, b) => a - b).join(',')) setOk = false;
+          rel.forEach((v) => { if (seenRel.has(v)) dup = true; seenRel.add(v); });
+          // 叶子性质：同一半张的两面 = 连续页对（奇数在前）
+          [[r.face1.right, r.face2.left], [r.face2.right, r.face1.left]].forEach((pp, i) => {
+            const ra = pp[0].page === null ? pp[0].rel : pp[0].page - (sig.start - 1);
+            const rb = pp[1].page === null ? pp[1].rel : pp[1].page - (sig.start - 1);
+            if (Math.abs(ra - rb) !== 1) leafOk = false;
+            if (i === 0 && pp[0].page !== null && (ra % 2) !== 1) leafOk = false;
+          });
+        });
+        if (dup || seenRel.size !== N) sigBad.push('帖 ' + sig.index + '（' + seenRel.size + '/' + N + '）');
+      });
+      // 多帖时聚合成一条，避免 50 帖把自检区刷成几百行；异常时点名是哪几帖
+      add('每帖帖内页码无重不漏', sigBad.length === 0,
+        res.signatures.length + ' 帖' + (sigBad.length ? '；异常：' + sigBad.join('、') : ''));
+      add('每张纸 4 面 = {2k−1, 2k, N−2k+1, N−2k+2}', setOk);
+      add('同一半张两面是连续页对（能被装订成册）', leafOk);
+      // 第一张第 1 面右边必须是第 1 页（封面在封面位）
+      const first = res.sheets[0];
+      coverOk = !!(first && first.face1.right && first.face1.right.page === 1);
+      add('封面（第 1 页）落在第 1 张第 1 面右侧', coverOk);
+    } else {
+      const real = [];
+      res.sheets.forEach((r) => { [r.face1.left, r.face2.left].forEach((c) => { if (c && !c.none) real.push(c.rel); }); });
+      const want = [];
+      for (let i = 1; i <= res.padded; i++) want.push(i);
+      add('顺序拼版读出的页序正好是 1…' + res.padded + '（含空白占位）',
+        real.join(',') === want.join(','), real.join(','));
+    }
+
+    const blankCount = labels.filter((x) => x === 'B').length;
+    add('空白格数 = 补齐页数', blankCount === res.blanks, blankCount + ' / ' + res.blanks);
+
+    const nums = res.sheets.flatMap((r) => [r.face1.left, r.face1.right, r.face2.left, r.face2.right])
+      .filter((c) => c && !c.none && c.page !== null).map((c) => c.page);
+    const uniq = new Set(nums);
+    add('正文页码不重复', uniq.size === nums.length, nums.length + ' 格 / ' + uniq.size + ' 个页码');
+    const expect = [];
+    for (let i = 1; i <= res.pages; i++) expect.push(i);
+    add('正文页码覆盖 1…' + res.pages, nums.slice().sort((a, b) => a - b).join(',') === expect.join(','));
+
+    const bad = [];
+    res.sheets.forEach((r) => { if (!(r.shift >= 0)) bad.push(r.k); });
+    add('内移量非负', bad.length === 0);
+    add('张数 = 所需纸张', res.sheetCount === (BINDINGS[res.binding].foldable ? res.padded / 4 : Math.ceil(res.padded / 2)));
+    return { checks: checks, allOk: checks.every((c) => c.ok) };
+  }
+
+  /* ── 敏感性 ──────────────────────────────────────────── */
+
+  function sensitivity(input) {
+    const base = normalize(input);
+    if (!base.ok) return [];
+    const cfg = base.cfg;
+    const rows = [];
+    const push = (label, mutate, read) => {
+      const nx = normalize(Object.assign({}, input, mutate));
+      if (!nx.ok) { rows.push({ label: label, value: '不适用', detail: nx.errors.join('；') }); return; }
+      const r = analyze(nx.cfg);
+      rows.push({ label: label, value: read(r, nx.cfg), cfg: nx.cfg, res: r });
+    };
+    const native = analyze(cfg);
+    rows.push({ label: '当前设置', value: readBase(native), cfg: cfg, res: native });
+    push('纸张厚一点（+20%）', { thickness: String(Math.round(cfg.thickness * 1.2 * 1000) / 1000) }, (r) => r.creep ? '最内内移 ' + fmt(r.maxShiftAll, 2) + ' mm' : '不适用');
+    push('纸张薄一点（−20%）', { thickness: String(Math.max(0.02, Math.round(cfg.thickness * 0.8 * 1000) / 1000)) }, (r) => r.creep ? '最内内移 ' + fmt(r.maxShiftAll, 2) + ' mm' : '不适用');
+    if (BINDINGS[cfg.binding].foldable) {
+      push('层厚系数改 1', { layer: 1 }, (r) => r.creep ? '最内内移 ' + fmt(r.maxShiftAll, 2) + ' mm' : '不适用');
+      push('每帖上限调到 ' + Math.max(8, cfg.perSig - 8), { perSig: String(Math.max(8, cfg.perSig - 8)) }, (r) => r.signatureCount + ' 帖（' + r.signatures.map((s) => s.size).join('/') + '）');
+      push('再多 2 页', { pages: String(Math.min(400, cfg.pages + 2)) }, (r) => r.sheetCount + ' 张 / 空白 ' + r.blanks);
+    }
+    ['saddle', 'perfect', 'coil'].forEach((k) => {
+      if (k === cfg.binding) return;
+      push('改用' + BINDINGS[k].name, { binding: k }, (r) => r.sheetCount + ' 张' + (r.creep ? '、内移 ' + fmt(r.maxShiftAll, 2) + ' mm' : '、无爬移') + '、书脊 ' + fmt(r.spine, 2) + ' mm');
+    });
+    return rows;
+  }
+
+  function readBase(r) {
+    return r.sheetCount + ' 张' + (r.signatureCount > 1 ? ' / ' + r.signatureCount + ' 帖' : '') + (r.creep ? '、内移 ' + fmt(r.maxShiftAll, 2) + ' mm' : '') + '、书脊 ' + fmt(r.spine, 2) + ' mm';
+  }
+
+  /* ── 内置场景 ────────────────────────────────────────── */
+
+  const scenarios = [
+    { key: 's1', name: '默认：20 页骑马钉（A4 对折成 A5）', input: { pages: '20', paper: 'A4', thickness: '0.10', perSig: '32', binding: 'saddle', creep: true, layer: 2, sheetPrice: '0.50' } },
+    { key: 's2', name: '空白补齐：19 页 → 多出 1 页空白', input: { pages: '19', paper: 'A4', thickness: '0.10', perSig: '32', binding: 'saddle', creep: true, layer: 2, sheetPrice: '0.50' } },
+    { key: 's3', name: '分帖：100 页、每帖上限 32', input: { pages: '100', paper: 'A4', thickness: '0.10', perSig: '32', binding: 'saddle', creep: true, layer: 2, sheetPrice: '0.50' } },
+    { key: 's4', name: '爬移明显：60 页 + 厚纸 0.20 mm', input: { pages: '60', paper: 'A4', thickness: '0.20', perSig: '64', binding: 'saddle', creep: true, layer: 2, sheetPrice: '0.50' } },
+    { key: 's5', name: 'A3 对折成 A4：32 页', input: { pages: '32', paper: 'A3', thickness: '0.12', perSig: '32', binding: 'saddle', creep: true, layer: 2, sheetPrice: '1.20' } },
+    { key: 's6', name: '胶装对照：50 页（每面 1 页顺序印）', input: { pages: '50', paper: 'A4', thickness: '0.10', perSig: '32', binding: 'perfect', creep: false, layer: 2, sheetPrice: '0.50' } }
+  ];
+
+  /* ── 工具 ────────────────────────────────────────────── */
+
+  function fmt(v, dp) {
+    if (v === null || v === undefined || !Number.isFinite(v)) return '—';
+    const d = dp === undefined ? 2 : dp;
+    const s = v.toFixed(d);
+    const parts = s.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  }
+
+  return {
+    PAPERS: PAPERS, BINDINGS: BINDINGS, LIMITS: LIMITS, defaults: defaults,
+    scenarios: scenarios,
+    parseNum: parseNum, normalize: normalize,
+    splitSignatures: splitSignatures,
+    imposeSignature: imposeSignature, sequentialPose: sequentialPose,
+    creepModel: creepModel,
+    analyze: analyze, verify: verify, sensitivity: sensitivity,
+    fmt: fmt, partsBetter: partsBetter
+  };
+});
+</script>
+<script>/* 折手账（booklet-impose）· 界面层
+ * 输入表单 → AppCore.normalize/analyze/verify → 渲染结论、拼版表、纸面示意、装订对照、
+ * 打印清单、结构自检、敏感性；四种导出（CSV/MD/JSON/PNG）+ 打印视图 + 本机保存。
+ * 不联网、不上传、不打印调试日志（控制台保持干净）。
+ */
+'use strict';
+(function () {
+  const C = window.AppCore;
+  const $ = (id) => document.getElementById(id);
+  const STORE_KEY = 'booklet-impose-v1';
+
+  const state = {
+    input: Object.assign({}, C.defaults),
+    res: null,
+    cfg: null,
+    sel: { sig: 1, k: 1 },
+    lastGood: null
+  };
+
+  /* ── 表单读写 ───────────────────────────────────────── */
+
+  function readInput() {
+    const binding = (document.querySelector('input[name=binding]:checked') || {}).value || 'saddle';
+    return {
+      pages: $('pages').value,
+      paper: $('paper').value,
+      customW: $('customW').value,
+      customH: $('customH').value,
+      thickness: $('thickness').value,
+      perSig: $('perSig').value,
+      binding: binding,
+      creep: $('creep').checked,
+      layer: $('layer').value,
+      sheetPrice: $('sheetPrice').value
+    };
+  }
+
+  function writeInput(obj) {
+    const v = Object.assign({}, C.defaults, obj || {});
+    $('pages').value = v.pages;
+    $('paper').value = v.paper;
+    $('customW').value = v.customW;
+    $('customH').value = v.customH;
+    $('thickness').value = v.thickness;
+    $('perSig').value = v.perSig;
+    $('layer').value = String(v.layer);
+    $('sheetPrice').value = v.sheetPrice;
+    $('creep').checked = v.creep === true || v.creep === 'true';
+    const r = document.querySelector('input[name=binding][value="' + v.binding + '"]');
+    if (r) r.checked = true;
+    syncConditional();
+    syncSegments();
+    state.input = v;
+  }
+
+  function syncConditional() {
+    $('customRow').hidden = $('paper').value !== 'custom';
+    const isSaddle = (document.querySelector('input[name=binding]:checked') || {}).value === 'saddle';
+    $('saddleOnly').hidden = !isSaddle;
+  }
+
+  function syncSegments() {
+    document.querySelectorAll('#bindingSeg label').forEach((lab) => {
+      const inp = lab.querySelector('input');
+      lab.classList.toggle('on', !!(inp && inp.checked));
+    });
+    document.querySelectorAll('#creepSeg label').forEach((lab) => {
+      const inp = lab.querySelector('input');
+      lab.classList.toggle('on', !!(inp && inp.checked));
+    });
+  }
+
+  function markBad(errors) {
+    ['pages', 'customW', 'customH', 'thickness', 'perSig', 'layer', 'sheetPrice'].forEach((id) => $(id).classList.remove('bad'));
+    errors.forEach((e) => {
+      const map = [['总页数', 'pages'], ['自定义纸宽', 'customW'], ['自定义纸高', 'customH'], ['纸张厚度', 'thickness'], ['每帖上限', 'perSig'], ['层厚系数', 'layer'], ['每张纸单价', 'sheetPrice']];
+      map.forEach(([kw, id]) => { if (e.indexOf(kw) >= 0) $(id).classList.add('bad'); });
+    });
+  }
+
+  /* ── 渲染 ───────────────────────────────────────────── */
+
+  function render(keepSelection) {
+    const input = readInput();
+    state.input = input;
+    const norm = C.normalize(input);
+    const errBox = $('errors');
+    if (!norm.ok) {
+      markBad(norm.errors);
+      errBox.className = 'on';
+      errBox.innerHTML = '<b>这几项还不能算：</b><ul>' + norm.errors.map((e) => '<li>' + esc(e) + '</li>').join('') + '</ul>' +
+        '<div style="margin-top:6px">下面的结果还是上一次能算出来的那一份。</div>';
+      return;
+    }
+    errBox.className = '';
+    errBox.innerHTML = '';
+    markBad([]);
+
+    const cfg = norm.cfg;
+    const res = C.analyze(cfg);
+    const ver = C.verify(res, cfg);
+    const sens = C.sensitivity(input);
+    state.cfg = cfg;
+    state.res = res;
+    state.verify = ver;
+    state.sensitivity = sens;
+    state.lastGood = { input: Object.assign({}, input), at: new Date().toISOString() };
+
+    if (!keepSelection || !res.sheets.some((s) => s.sig === state.sel.sig && s.k === state.sel.k)) {
+      state.sel = { sig: 1, k: 1 };
+    }
+
+    renderHeadline(res, cfg);
+    renderSheets(res, cfg);
+    renderDiagram(res, cfg);
+    renderBinding(res, cfg);
+    renderChecklist(res, cfg);
+    renderAdvice(res, cfg);
+    renderChecks(res, ver, cfg);
+    renderSensitivity(sens);
+    renderLimits(res, cfg);
+    renderPrint(res, cfg);
+    $('saveState').textContent = '上一次成功计算：' + new Date().toLocaleTimeString('zh-CN', { hour12: false }) + '（本机保存只存在这个浏览器里）。';
+  }
+
+  function renderHeadline(res, cfg) {
+    $('headline').innerHTML = esc(res.headline).replace(/[0-9][0-9,.]*\s?(mm|张|帖|页)?/g, (m) => '<b>' + m + '</b>');
+    $('bindingTag').textContent = res.bindingName + ' · ' + C.BINDINGS[res.binding].short;
+    const kpis = [];
+    kpis.push({ k: '用纸张数', v: C.fmt(res.sheetCount, 0), u: ' 张', hi: true });
+    if (C.BINDINGS[res.binding].foldable) {
+      kpis.push({ k: '分帖', v: C.fmt(res.signatureCount, 0), u: ' 帖', hi: false });
+      kpis.push({ k: res.creepOn ? '最内一张内容内移' : '前口突出（未补偿）', v: C.fmt(res.creepOn ? res.maxShiftAll : (res.creep ? res.creep.protrude : 0), 2), u: ' mm', hi: res.creepOn });
+      kpis.push({ k: '按外张切齐裁切量', v: C.fmt(res.trimAll, 2), u: ' mm', hi: false });
+      kpis.push({ k: '空白页', v: C.fmt(res.blanks, 0), u: ' 页', hi: false });
+    } else {
+      kpis.push({ k: '空白页', v: C.fmt(res.blanks, 0), u: ' 页', hi: false });
+      kpis.push({ k: '书脊厚度', v: C.fmt(res.spine, 2), u: ' mm', hi: true });
+      kpis.push({ k: '印面数', v: C.fmt(res.faces, 0), u: ' 面', hi: false });
+    }
+    kpis.push({ k: '纸张成本', v: '¥' + C.fmt(res.cost, 2), u: '', hi: false });
+    $('kpis').innerHTML = kpis.map((x) => '<div class="kpi' + (x.hi ? ' hi' : '') + '"><div class="k">' + x.k + '</div><div class="v">' + x.v + '<span class="u">' + x.u + '</span></div></div>').join('');
+    const fin = (res.finish.w && res.finish.h) ? (res.finish.w + ' × ' + res.finish.h + ' mm') : '—';
+    $('sizeNote').textContent = '纸张 ' + (res.paper.w ? res.paper.w + '×' + res.paper.h + ' mm（' + res.paper.name + '，横向）' : '—') +
+      ' → 对折后成品 ' + fin + '；页数 ' + res.pages + (res.blanks ? '（+ ' + res.blanks + ' 页空白 → ' + res.padded + ' 页）' : '') +
+      '；纸厚 ' + C.fmt(res.thickness, 3) + ' mm × 层厚系数 ' + res.layer + ' → 每层 ' + (res.creep ? C.fmt(res.creep.L, 3) : '—') + ' mm；书脊 ' + C.fmt(res.spine, 2) + ' mm。';
+  }
+
+  function cellHTML(c) {
+    if (!c) return '<div class="cell"></div>';
+    if (c.none) return '<div class="cell bl"><span class="n">—</span><span class="t">本面不印</span></div>';
+    if (c.blank) return '<div class="cell bl"><span class="n">空白</span><span class="t">留白</span></div>';
+    return '<div class="cell"><span class="n">' + c.label + '</span><span class="t">' + (c.page === 1 ? '封面' : '') + '</span></div>';
+  }
+
+  function renderSheets(res, cfg) {
+    const foldable = C.BINDINGS[res.binding].foldable;
+    $('sheetTag').textContent = foldable ? '每面 2 页 · 第 2 面是翻面后的视角' : '每面 1 页 · 顺序双面';
+    $('sheetHint').textContent = foldable
+      ? '第 k 张的第 1 面先印：左 ' + 'N−2(k−1)' + '、右 ' + '2k−1' + '；翻面后印第 2 面：左 ' + '2k' + '、右 ' + 'N−2k+1' + '（N = 本帖页数）。内移量是这一张内容朝书脊方向要挪的毫米数。'
+      : '每面 1 页顺序印：第 k 张正面 ' + '2k−1' + '、反面 ' + '2k' + '。胶装/圈装不需要折手拼版，按顺序叠齐即可。';
+    let html = '<thead><tr><th>帖</th><th class="num">张</th><th class="num">第 1 面左</th><th class="num">第 1 面右</th><th class="num">第 2 面左</th><th class="num">第 2 面右</th>' + (foldable ? '<th class="num">内移 mm</th>' : '') + '</tr></thead><tbody>';
+    res.signatures.forEach((sig) => {
+      if (res.signatureCount > 1) {
+        html += '<tr class="sighead"><td colspan="' + (foldable ? 7 : 6) + '">第 ' + sig.index + ' 帖 · 全局第 ' + sig.start + '–' + sig.end + ' 页 · ' + sig.sheets + ' 张</td></tr>';
+      }
+      sig.rows.forEach((r) => {
+        const cells = [r.face1.left, r.face1.right, r.face2.left, r.face2.right];
+        html += '<tr><td>' + sig.index + '</td><td class="num">' + r.k + ' / ' + r.m + '</td>' +
+          cells.map((c) => '<td class="num' + (c.blank ? ' blank' : '') + '"><span>' + esc(c.label) + '</span></td>').join('') +
+          (foldable ? '<td class="num">' + C.fmt(r.shift, 2) + '</td>' : '') + '</tr>';
+      });
+    });
+    html += '</tbody>';
+    $('sheetTable').innerHTML = html;
+    $('sheetLegend').textContent = (foldable
+      ? '「空白」是页数不是 4 的倍数补齐出来的位置；内移量按这一帖的层厚 ' + (res.creep ? C.fmt(res.creep.L, 3) : '—') + ' mm 算，越往里越大。'
+      : '「空白」是最后一张剩下的位置。') + ' 窄屏下表格可左右滑动看全列。';
+  }
+
+  function renderDiagram(res, cfg) {
+    const list = res.sheets.filter((s) => s.sig === state.sel.sig);
+    if (!list.length) { $('diagram').innerHTML = ''; return; }
+    const m = list.length;
+    let sel = list.find((s) => s.k === state.sel.k);
+    if (!sel) { sel = list[0]; state.sel.k = sel.k; }
+    const foldable = C.BINDINGS[res.binding].foldable;
+    const opts = list.map((s) => '<option value="' + s.k + '"' + (s.k === sel.k ? ' selected' : '') + '>第 ' + s.k + ' 张 / 共 ' + m + ' 张</option>').join('');
+    let html = '';
+    if (res.signatureCount > 1) {
+      const sigOpts = res.signatures.map((sg) => '<option value="' + sg.index + '"' + (sg.index === state.sel.sig ? ' selected' : '') + '>第 ' + sg.index + ' 帖（' + sg.start + '–' + sg.end + ' 页）</option>').join('');
+      html += '<div class="field" style="flex:1 1 100%"><label>看哪一帖</label><select id="sigPick">' + sigOpts + '</select></div>';
+    }
+    html += '<div class="field" style="flex:1 1 100%"><label>看哪一张</label><select id="kPick">' + opts + '</select></div>';
+    html += '<div class="sheet"><h4>第 1 面（先印）</h4><div class="paper">' + cellHTML(sel.face1.left) + cellHTML(sel.face1.right) + (foldable ? '<div class="fold"></div>' : '') + '</div>' +
+      '<p class="facecap">' + (foldable ? '沿虚线对折 · ' : '') + '左 ' + esc(sel.face1.left.label) + ' / 右 ' + esc(sel.face1.right.label) + '</p></div>';
+    html += '<div class="sheet"><h4>第 2 面（翻面后印）</h4><div class="paper">' + cellHTML(sel.face2.left) + cellHTML(sel.face2.right) + (foldable ? '<div class="fold"></div>' : '') + '</div>' +
+      '<p class="facecap">翻面：左右对调、上下不变 · 左 ' + esc(sel.face2.left.label) + ' / 右 ' + esc(sel.face2.right.label) + '</p></div>';
+    if (foldable) {
+      html += '<div class="sheet"><h4>这一张要挪多少</h4><div style="font-size:22px;font-weight:700;color:var(--accent)">' + C.fmt(sel.shift, 2) + ' mm</div>' +
+        '<p class="facecap" style="text-align:left">从外数第 ' + sel.k + ' 张，朝书脊方向内移 ' + C.fmt(sel.shift, 2) + ' mm（最外一张 0，最内一张 ' + C.fmt(res.trimAll, 2) + ' mm）。</p></div>';
+    }
+    $('diagram').innerHTML = html;
+    $('diagramNote').textContent = foldable
+      ? '对折后第 ' + sel.k + ' 张展开应是「左 ' + (2 * sel.k - 1) + ' | 右 ' + (2 * sel.k) + '」对上「左 ' + (sel.m * 4 - 2 * sel.k + 1) + ' | 右 ' + (sel.m * 4 - 2 * sel.k + 2) + '」（帖内页码）。'
+      : '按这张的顺序印完再叠下一张即可。';
+    const kp = $('kPick');
+    if (kp) kp.addEventListener('change', () => { state.sel.k = Number(kp.value); render(true); });
+    const sp = $('sigPick');
+    if (sp) sp.addEventListener('change', () => { state.sel.sig = Number(sp.value); state.sel.k = 1; render(false); });
+  }
+
+  function renderBinding(res, cfg) {
+    let html = '<thead><tr><th>装订方式</th><th>拼版</th><th class="num">补齐到</th><th class="num">空白</th><th class="num">用纸</th><th class="num">书脊 mm</th><th>能平摊</th><th>说明</th></tr></thead><tbody>';
+    res.bindingRows.forEach((b) => {
+      html += '<tr' + (b.current ? ' style="background:var(--accent-soft)"' : '') + '><td>' + b.name + (b.current ? ' <span class="pill">当前</span>' : '') + '</td><td class="pose">' + esc(b.pose) + '</td>' +
+        '<td class="num">' + b.padded + ' 页</td><td class="num">' + b.blanks + '</td><td class="num">' + b.sheets + ' 张</td><td class="num">' + C.fmt(b.spine, 2) + '</td>' +
+        '<td class="pose">' + (b.flat ? '能' : '不能') + '</td><td class="note">' + esc(b.note) + '</td></tr>';
+    });
+    html += '</tbody>';
+    $('bindingTable').innerHTML = html;
+  }
+
+  function renderChecklist(res, cfg) {
+    $('checklist').innerHTML = res.checklist.map((t) => '<li>' + esc(t) + '</li>').join('');
+  }
+
+  function renderAdvice(res, cfg) {
+    $('advice').innerHTML = res.advice.length
+      ? res.advice.map((a) => '<li>' + esc(a.text) + '</li>').join('')
+      : '<li>当前设置没有需要特别提醒的地方：单张纸、不用分帖、页数正好。</li>';
+  }
+
+  function renderChecks(res, ver, cfg) {
+    $('checks').innerHTML = ver.checks.map((c) => '<div class="check ' + (c.ok ? 'ok' : 'no') + '"><span class="dot">' + (c.ok ? '✓' : '✗') + '</span><span>' + esc(c.name) + (c.detail ? '<span style="color:var(--muted)"> · ' + esc(c.detail) + '</span>' : '') + '</span></div>').join('');
+    $('checkNote').textContent = ver.allOk
+      ? '自检全部通过：页序无重不漏、每张纸 4 个面正好是 {2k−1, 2k, N−2k+1, N−2k+2}、每个半张的两面是连续页对（这是能被装订成册的结构条件）。'
+      : '有自检未通过，请不要照这份表打印。';
+  }
+
+  function renderSensitivity(rows) {
+    let html = '<thead><tr><th>条件</th><th>结果</th></tr></thead><tbody>';
+    rows.forEach((r) => {
+      html += '<tr><td style="white-space:normal">' + esc(r.label) + '</td><td style="white-space:normal">' + esc(r.value) + '</td></tr>';
+    });
+    html += '</tbody>';
+    $('sensTable').innerHTML = html;
+  }
+
+  function renderLimits(res, cfg) {
+    const items = [
+      '只支持<b>对折一次</b>（每面 2 页、每张纸 4 页）；每面 4 页（A3 折两次）的折序与转向组合多，本页不做。',
+      '爬移是<b>线性模型</b>：每层厚 = 层厚系数 × 纸张厚度，第 k 张内移 (k−1) × 每层厚。真实推挤曲线与纸张纹向、湿度有关，本页不测纸、不给经验值。',
+      '纸张厚度、单价、页数全部由你填写；本页<b>不联网</b>、不查打印店价格、不检查打印机是否支持双面。',
+      '不做出血、裁切线、色彩管理、双面套准偏差、覆膜与勒口；不处理跨骑缝的跨页图。',
+      '分帖只是把页数切成若干整帖，不处理不同帖用不同纸张或不同装订的组合。',
+      '判定性文字（如「厚到会鼓」「爬移明显」）只是<b>显示分组</b>，不是印刷行业标准或质量结论。',
+      '默认样例与 6 个内置场景都是<b>虚构示例</b>，不是真实印制记录。'
+    ];
+    $('limits').innerHTML = items.map((t) => '<li>' + t + '</li>').join('');
+  }
+
+  function renderPrint(res, cfg) {
+    const foldable = C.BINDINGS[res.binding].foldable;
+    const withBack = $('printFaces').checked;
+    const parts = [];
+    res.sheets.forEach((r) => {
+      const faces = withBack ? [['第 1 面', r.face1], ['第 2 面', r.face2]] : [['第 1 面', r.face1]];
+      faces.forEach(([name, f]) => {
+        const cells = foldable ? [f.left, f.right] : [f.left];
+        parts.push('<div class="pcard"><div class="ptitle">第 ' + r.sig + ' 帖 · 第 ' + r.k + ' / ' + r.m + ' 张 · ' + name + '（' +
+          cells.map((c) => esc(c.label)).join(' | ') + '）</div><div class="psheet"' + (foldable ? '' : ' style="grid-template-columns:1fr"') + '>' +
+          cells.map((c) => '<div>' + esc(c.label) + '</div>').join('') + '</div></div>');
+      });
+    });
+    $('printArea').innerHTML = parts.join('');
+    const ps = $('printStyle');
+    if (ps && res.paper.w) {
+      ps.textContent = '@media print{@page{size:' + res.paper.w + 'mm ' + res.paper.h + 'mm;margin:0}' +
+        '.psheet{width:' + res.paper.w + 'mm;height:calc(100% - 8mm)}}';
+    }
+  }
+
+  /* ── 导出 ───────────────────────────────────────────── */
+
+  function download(name, text, type) {
+    try {
+      const blob = new Blob([text], { type: type || 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      toast('已导出 ' + name);
+    } catch (e) {
+      toast('导出失败：' + e.message);
+    }
+  }
+
+  function csvText(res, cfg) {
+    const L = [];
+    L.push('# 折手账 · 小册子拼版与装订对账');
+    L.push('# 生成时间,' + new Date().toLocaleString('zh-CN'));
+    L.push('');
+    L.push('【汇总】');
+    L.push('项目,值');
+    const rows = [
+      ['成品总页数', res.pages], ['补齐后页数', res.padded], ['空白页数', res.blanks],
+      ['装订方式', res.bindingName], ['用纸张数', res.sheetCount], ['分帖数', res.signatureCount],
+      ['帖页数', res.signatures.map((s) => s.size).join(' / ')], ['纸张', res.paper.name],
+      ['纸张尺寸 mm', res.paper.w ? res.paper.w + '×' + res.paper.h : '—'],
+      ['成品尺寸 mm', res.finish.w ? res.finish.w + '×' + res.finish.h : '—'],
+      ['纸张厚度 mm', res.thickness], ['层厚系数', res.layer],
+      ['每层厚度 mm', res.creep ? res.creep.L : '不适用'],
+      ['最内一张内移 mm', res.creepOn ? res.maxShiftAll : 0],
+      ['前口突出 mm', res.creep ? res.creep.protrude : '不适用'],
+      ['按外张切齐裁切量 mm', res.trimAll], ['书脊厚度 mm', res.spine],
+      ['印面数', res.faces], ['纸张成本 元', res.cost]
+    ];
+    rows.forEach((r) => L.push(r[0] + ',' + r[1]));
+    L.push('');
+    L.push('【拼版表】');
+    L.push(C.BINDINGS[res.binding].foldable
+      ? '帖,张,第1面左,第1面右,第2面左,第2面右,内移mm'
+      : '张,第1面,第2面');
+    res.signatures.forEach((sig) => {
+      sig.rows.forEach((r) => {
+        if (C.BINDINGS[res.binding].foldable) {
+          L.push([sig.index, r.k + '/' + r.m, r.face1.left.label, r.face1.right.label, r.face2.left.label, r.face2.right.label, C.fmt(r.shift, 2)].join(','));
+        } else {
+          L.push([r.k + '/' + r.m, r.face1.left.label, r.face2.left.label].join(','));
+        }
+      });
+    });
+    L.push('');
+    L.push('【装订方式对照】');
+    L.push('装订方式,拼版,补齐到页,空白页,用纸张数,书脊mm,能否平摊,当前');
+    res.bindingRows.forEach((b) => L.push([b.name, b.pose, b.padded, b.blanks, b.sheets, C.fmt(b.spine, 2), b.flat ? '能' : '不能', b.current ? '是' : ''].join(',')));
+    L.push('');
+    L.push('【敏感性】');
+    L.push('条件,结果');
+    (state.sensitivity || []).forEach((s) => L.push([s.label, String(s.value).replace(/,/g, '，')].join(',')));
+    L.push('');
+    L.push('# 默认样例与内置场景均为虚构示例；爬移为线性模型，不是印刷机实测曲线。');
+    return '\ufeff' + L.join('\n');
+  }
+
+  function mdText(res, cfg) {
+    const L = [];
+    L.push('# 折手账 · ' + res.bindingName + '（' + res.pages + ' 页）');
+    L.push('');
+    L.push('> ' + res.headline);
+    L.push('');
+    L.push('| 项目 | 值 |');
+    L.push('|---|---|');
+    [['纸张', res.paper.name + (res.paper.w ? ' ' + res.paper.w + '×' + res.paper.h + ' mm' : '')],
+     ['成品尺寸', res.finish.w ? res.finish.w + '×' + res.finish.h + ' mm' : '—'],
+     ['页数 / 补齐 / 空白', res.pages + ' / ' + res.padded + ' / ' + res.blanks],
+     ['用纸张数 / 分帖', res.sheetCount + ' 张 / ' + res.signatureCount + ' 帖'],
+     ['帖页数', res.signatures.map((s) => s.size).join(' / ')],
+     ['每层厚度', (res.creep ? C.fmt(res.creep.L, 3) : '—') + ' mm'],
+     ['最内一张内移', C.fmt(res.creepOn ? res.maxShiftAll : 0, 2) + ' mm'],
+     ['前口裁切量', C.fmt(res.trimAll, 2) + ' mm'],
+     ['书脊厚度', C.fmt(res.spine, 2) + ' mm'],
+     ['纸张成本', '¥' + C.fmt(res.cost, 2)]].forEach((r) => L.push('| ' + r[0] + ' | ' + r[1] + ' |'));
+    L.push('');
+    L.push('## 拼版表');
+    L.push('');
+    if (C.BINDINGS[res.binding].foldable) {
+      L.push('| 帖 | 张 | 第 1 面左 | 第 1 面右 | 第 2 面左 | 第 2 面右 | 内移 mm |');
+      L.push('|---|---|---|---|---|---|---|');
+      res.signatures.forEach((sig) => sig.rows.forEach((r) => {
+        L.push('| ' + sig.index + ' | ' + r.k + '/' + r.m + ' | ' + r.face1.left.label + ' | ' + r.face1.right.label + ' | ' + r.face2.left.label + ' | ' + r.face2.right.label + ' | ' + C.fmt(r.shift, 2) + ' |');
+      }));
+    } else {
+      L.push('| 张 | 第 1 面 | 第 2 面 |');
+      L.push('|---|---|---|');
+      res.sheets.forEach((r) => L.push('| ' + r.k + '/' + r.m + ' | ' + r.face1.left.label + ' | ' + r.face2.left.label + ' |'));
+    }
+    L.push('');
+    L.push('## 打印与装订清单');
+    L.push('');
+    res.checklist.forEach((t) => L.push('- ' + t));
+    L.push('');
+    L.push('## 结构自检');
+    L.push('');
+    (state.verify ? state.verify.checks : []).forEach((c) => L.push('- ' + (c.ok ? '✓' : '✗') + ' ' + c.name + (c.detail ? '（' + c.detail + '）' : '')));
+    L.push('');
+    L.push('## 该注意什么');
+    L.push('');
+    res.advice.forEach((a) => L.push('- ' + a.text));
+    L.push('');
+    L.push('## 边界');
+    L.push('');
+    L.push('- 只支持对折一次（每面 2 页）；爬移为线性模型；不联网、不查打印店价格；默认样例为虚构示例。');
+    return L.join('\n');
+  }
+
+  function jsonBackup(res, cfg) {
+    return JSON.stringify({
+      app: 'booklet-impose', version: '1.0.0', savedAt: new Date().toISOString(),
+      input: state.input,
+      summary: {
+        pages: res.pages, padded: res.padded, blanks: res.blanks, binding: res.binding,
+        sheetCount: res.sheetCount, signatureCount: res.signatureCount,
+        signatureSizes: res.signatures.map((s) => s.size),
+        paper: res.paper, finish: res.finish, thickness: res.thickness, layer: res.layer,
+        layerMm: res.creep ? res.creep.L : null, maxShift: res.maxShiftAll, trim: res.trimAll,
+        spine: res.spine, faces: res.faces, cost: res.cost
+      }
+    }, null, 2);
+  }
+
+  /* 结果卡 PNG 1080×1350 */
+  function pngCard() {
+    const res = state.res;
+    if (!res) { toast('还没有可导出的结果'); return; }
+    const W = 1080, H = 1350;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const g = cv.getContext('2d');
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#b4442c'; g.fillRect(0, 0, W, 16);
+    let y = 96;
+    g.fillStyle = '#1b2733'; g.font = '700 56px -apple-system,"PingFang SC",sans-serif';
+    g.fillText('折手账 · 小册子拼版', 64, y);
+    y += 46;
+    g.fillStyle = '#5c6b7a'; g.font = '400 30px -apple-system,"PingFang SC",sans-serif';
+    g.fillText(res.bindingName + ' · ' + res.pages + ' 页 · ' + res.paper.name + ' 横向对折', 64, y);
+    y += 56;
+
+    const kpis = [
+      ['用纸', res.sheetCount + ' 张'],
+      ['分帖', res.signatureCount + ' 帖'],
+      ['空白页', res.blanks + ' 页'],
+      [res.creepOn ? '最内内移' : '前口突出', C.fmt(res.creepOn ? res.maxShiftAll : (res.creep ? res.creep.protrude : 0), 2) + ' mm']
+    ];
+    const bw = (W - 128 - 3 * 20) / 4;
+    kpis.forEach((k, i) => {
+      const x = 64 + i * (bw + 20);
+      g.fillStyle = i === 3 ? '#fbeeea' : '#eef3f7';
+      roundRect(g, x, y, bw, 132, 14); g.fill();
+      g.fillStyle = '#5c6b7a'; g.font = '400 24px -apple-system,"PingFang SC",sans-serif';
+      g.fillText(k[0], x + 18, y + 44);
+      g.fillStyle = i === 3 ? '#b4442c' : '#1b2733'; g.font = '700 38px -apple-system,"PingFang SC",sans-serif';
+      g.fillText(k[1], x + 18, y + 100);
+    });
+    y += 176;
+
+    g.fillStyle = '#1b2733'; g.font = '700 30px -apple-system,"PingFang SC",sans-serif';
+    g.fillText('第 1 张怎么排', 64, y);
+    y += 20;
+    const first = res.sheets[0];
+    const foldable = C.BINDINGS[res.binding].foldable;
+    const pw = W - 128, ph = 150;
+    const cells = foldable ? [first.face1.left, first.face1.right] : [first.face1.left];
+    const cw = pw / cells.length;
+    [['第 1 面（先印）', 0], ['第 2 面（翻面后印）', 1]].forEach(([cap, idx]) => {
+      const yy = y + 34 + idx * (ph + 62);
+      g.fillStyle = '#5c6b7a'; g.font = '400 24px -apple-system,"PingFang SC",sans-serif';
+      g.fillText(cap, 64, yy - 10);
+      g.strokeStyle = '#b9c6d1'; g.lineWidth = 2;
+      g.strokeRect(64, yy, pw, ph);
+      const face = idx === 0 ? first.face1 : first.face2;
+      const cs = foldable ? [face.left, face.right] : [face.left];
+      cs.forEach((c, i) => {
+        const cx = 64 + i * cw;
+        if (i > 0) { g.beginPath(); g.moveTo(cx, yy); g.lineTo(cx, yy + ph); g.stroke(); }
+        g.fillStyle = c.blank ? '#9aa7b4' : '#1b2733';
+        g.font = (c.blank ? '600 34px' : '700 52px') + ' -apple-system,"PingFang SC",sans-serif';
+        const t = c.label;
+        const tw = g.measureText(t).width;
+        g.fillText(t, cx + (cw - tw) / 2, yy + ph / 2 + 16);
+      });
+    });
+    y += 34 + 2 * (ph + 62) + 10;
+
+    // 全部张的拼版一览（张数多时只列首尾，避免把卡塞满）
+    g.fillStyle = '#1b2733'; g.font = '700 30px -apple-system,"PingFang SC",sans-serif';
+    g.fillText(res.sheetCount <= 1 ? '这一张的四个面' : '全部 ' + res.sheetCount + ' 张（第 1 面 | 第 2 面）', 64, y);
+    y += 6;
+    const rowsToShow = res.sheets.length <= 8
+      ? res.sheets
+      : res.sheets.slice(0, 4).concat([null]).concat(res.sheets.slice(-1));
+    rowsToShow.forEach((r) => {
+      y += 39;
+      if (!r) {
+        g.fillStyle = '#8b98a4'; g.font = '400 24px -apple-system,"PingFang SC",sans-serif';
+        g.fillText('…… 其余 ' + (res.sheetCount - 5) + ' 张见页面拼版表与 CSV 导出', 64, y);
+        return;
+      }
+      g.font = '400 25px -apple-system,"PingFang SC",sans-serif';
+      g.fillStyle = '#5c6b7a';
+      g.fillText((res.signatureCount > 1 ? '帖' + r.sig + ' ' : '') + '第 ' + r.k + ' 张', 64, y);
+      g.fillStyle = '#1b2733';
+      if (foldable) {
+        g.fillText(r.face1.left.label + ' | ' + r.face1.right.label, 250, y);
+        g.fillText(r.face2.left.label + ' | ' + r.face2.right.label, 430, y);
+        g.fillStyle = r.shift > 0 ? '#b4442c' : '#8b98a4';
+        g.fillText('内移 ' + C.fmt(r.shift, 2) + ' mm', 640, y);
+      } else {
+        g.fillText('第 1 面 ' + r.face1.left.label, 250, y);
+        g.fillText('第 2 面 ' + r.face2.left.label, 470, y);
+      }
+    });
+    y += 56;
+
+    if (y < 1170) {
+      g.fillStyle = '#1b2733'; g.font = '700 30px -apple-system,"PingFang SC",sans-serif';
+      g.fillText('要记住的', 64, y);
+      y += 34;
+    const bullets = res.advice.slice(0, 2).map((a) => a.text);
+    if (!bullets.length) bullets.push('单张纸、不用分帖、页数正好：按表拼版即可。');
+    g.font = '400 26px -apple-system,"PingFang SC",sans-serif';
+    bullets.forEach((b) => {
+      if (y > 1250) return;
+      g.fillStyle = '#b4442c'; g.fillText('·', 64, y);
+      g.fillStyle = '#1b2733';
+      const lines = wrapText(g, b, W - 200);
+      lines.slice(0, 2).forEach((ln) => { g.fillText(ln, 92, y); y += 36; });
+      y += 4;
+    });
+    }
+
+    g.fillStyle = '#8b98a4'; g.font = '400 22px -apple-system,"PingFang SC",sans-serif';
+    const foot = '数字由同一套已验算的计算导出；爬移为线性模型，不是印刷机实测曲线。示例场景均为虚构。';
+    wrapText(g, foot, W - 128).forEach((ln) => { g.fillText(ln, 64, H - 66); });
+    g.fillStyle = '#b4442c'; g.fillRect(0, H - 16, W, 16);
+
+    cv.toBlob((blob) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '折手账-结果卡-' + res.paper.key + '-' + res.pages + '页.png';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      toast('已导出结果卡 PNG');
+    }, 'image/png');
+  }
+
+  function roundRect(g, x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+
+  // 换行：不在数字中间断行、不让收尾标点落在行首
+  function wrapText(g, text, maxWidth) {
+    const CLOSERS = '，。、；：！？）》」』】%…';
+    const tokens = [];
+    // 逐字符扫描，把「数字+单位」当一个整体，避免数字被拆行
+    let i = 0;
+    while (i < text.length) {
+      const ch = text[i];
+      if (/[0-9]/.test(ch)) {
+        let j = i;
+        while (j < text.length && /[0-9,.]/.test(text[j])) j++;
+        if (text.slice(j, j + 1) === ' ') j++;
+        const unit = /^(mm|kg|%|页|张|帖|元|cm)/.exec(text.slice(j));
+        if (unit) j += unit[0].length;
+        tokens.push(text.slice(i, j));
+        i = j;
+      } else if (/\s/.test(ch)) {
+        tokens.push(' ');
+        i++;
+      } else {
+        tokens.push(ch);
+        i++;
+      }
+    }
+    const lines = [];
+    let cur = '';
+    tokens.forEach((tk) => {
+      if (tk === ' ') {
+        if (cur && !/\s$/.test(cur)) cur += ' ';
+        return;
+      }
+      const test = cur + tk;
+      if (g.measureText(test).width > maxWidth && cur.trim()) {
+        if (CLOSERS.indexOf(tk) >= 0 && g.measureText(cur + tk).width <= maxWidth * 1.12) {
+          cur += tk;
+          return;
+        }
+        lines.push(cur.replace(/\s+$/, ''));
+        cur = tk;
+      } else {
+        cur = test;
+      }
+    });
+    if (cur.trim()) lines.push(cur.replace(/\s+$/, ''));
+    return lines;
+  }
+
+  /* ── 本机保存 / 读取 ────────────────────────────────── */
+
+  function saveLocal() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({ input: readInput(), at: new Date().toISOString() }));
+      toast('已保存到本机（只在这个浏览器里）');
+    } catch (e) { toast('保存失败：' + e.message); }
+  }
+
+  function loadLocal(silent) {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) { if (!silent) toast('本机还没有保存过'); return false; }
+      const obj = JSON.parse(raw);
+      if (!obj || !obj.input) { if (!silent) toast('本机保存的内容不完整'); return false; }
+      writeInput(obj.input);
+      render(false);
+      if (!silent) toast('已读取 ' + new Date(obj.at).toLocaleString('zh-CN'));
+      return true;
+    } catch (e) { if (!silent) toast('读取失败：' + e.message); return false; }
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = 'on';
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 2200);
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  /* ── 事件 ───────────────────────────────────────────── */
+
+  function bind() {
+    const inputs = ['pages', 'paper', 'customW', 'customH', 'thickness', 'perSig', 'layer', 'sheetPrice'];
+    inputs.forEach((id) => {
+      const el = $(id);
+      el.addEventListener('input', () => { syncConditional(); render(true); });
+      el.addEventListener('change', () => { syncConditional(); syncSegments(); render(true); });
+    });
+    document.querySelectorAll('input[name=binding]').forEach((el) => {
+      el.addEventListener('change', () => { syncConditional(); syncSegments(); render(false); });
+    });
+    $('creep').addEventListener('change', () => { syncSegments(); render(true); });
+    $('printFaces').addEventListener('change', () => { if (state.res) renderPrint(state.res, state.cfg); });
+
+    $('btnReset').addEventListener('click', () => { writeInput(C.defaults); render(false); toast('已恢复默认样例'); });
+    $('btnSave').addEventListener('click', saveLocal);
+    $('btnLoad').addEventListener('click', () => loadLocal(false));
+    $('btnCsv').addEventListener('click', () => { if (state.res) download('折手账-拼版-' + state.res.pages + '页.csv', csvText(state.res, state.cfg), 'text/csv;charset=utf-8'); });
+    $('btnMd').addEventListener('click', () => { if (state.res) download('折手账-拼版-' + state.res.pages + '页.md', mdText(state.res, state.cfg), 'text/markdown;charset=utf-8'); });
+    $('btnJson').addEventListener('click', () => { if (state.res) download('折手账-备份.json', jsonBackup(state.res, state.cfg), 'application/json'); });
+    $('btnPng').addEventListener('click', pngCard);
+    $('btnPrint').addEventListener('click', () => {
+      if (!state.res) return;
+      renderPrint(state.res, state.cfg);
+      toast('已生成拼版页：按 Ctrl/⌘ + P，纸张选横向、缩放 100%');
+      setTimeout(() => { window.print(); }, 300);
+    });
+
+    const sel = $('scenario');
+    C.scenarios.forEach((s) => {
+      const o = document.createElement('option');
+      o.value = s.key; o.textContent = s.name;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => {
+      const sc = C.scenarios.find((x) => x.key === sel.value);
+      if (!sc) return;
+      writeInput(sc.input);
+      render(false);
+      toast('已载入场景：' + sc.name);
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveLocal(); }
+    });
+  }
+
+  /* ── 启动 ───────────────────────────────────────────── */
+
+  function boot() {
+    bind();
+    const loaded = loadLocal(true);
+    if (!loaded) { writeInput(C.defaults); }
+    render(false);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

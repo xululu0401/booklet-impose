@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>折手账 · 小册子拼版与装订对账台</title>
+<style id="printStyleHost">
+:root{
+  --ink:#1b2733; --muted:#5c6b7a; --line:#dbe3ea; --line2:#eef3f7; --bg:#f4f7f9; --card:#fff;
+  --accent:#b4442c; --accent-soft:#fbeeea; --accent2:#2c6e9b; --accent2-soft:#eaf2f8;
+  --ok:#2f7a52; --warn:#a9741b; --blank:#9aa7b4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:700;line-height:1.3}
+a{color:var(--accent2)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 64px}
+header.top{padding:6px 0 16px;border-bottom:1px solid var(--line);margin-bottom:18px}
+header.top h1{font-size:26px;letter-spacing:.5px}
+header.top h1 span{color:var(--accent)}
+header.top p{margin:8px 0 0;color:var(--muted);font-size:15px;max-width:760px}
+.meta{margin-top:10px;color:var(--muted);font-size:12.5px}
+.app{display:grid;grid-template-columns:344px minmax(0,1fr);gap:18px;align-items:start}
+.app>*{min-width:0}
+@media (max-width:980px){.app{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 16px 18px;margin-bottom:16px}
+.card>h2{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card>h2 .tag{font-weight:500;font-size:12px;color:var(--muted);background:var(--line2);border-radius:999px;padding:2px 9px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 10px}
+aside.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain}
+@media (max-width:980px){aside.panel{position:static;max-height:none;overflow:visible}}
+.field{margin-bottom:12px}
+.field>label{display:block;font-size:13.5px;font-weight:600;margin-bottom:5px}
+.field .sub{font-weight:400;color:var(--muted);font-size:12px}
+input[type=text],input[type=number],select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit}
+input:focus,select:focus{outline:2px solid var(--accent2-soft);border-color:var(--accent2)}
+input.bad{border-color:var(--accent);background:var(--accent-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:620px){.row2{grid-template-columns:1fr}}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer;background:#fff}
+.seg input{accent-color:var(--accent)}
+.seg label.on{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+button{font:inherit;font-size:14px;padding:8px 13px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.ghost{background:var(--line2)}
+button:hover{border-color:var(--accent2)}
+#errors{display:none;margin:0 0 12px;padding:10px 12px;border:1px solid #e3b8ac;background:var(--accent-soft);border-radius:10px;font-size:13.5px;color:#7d2d19}
+#errors.on{display:block}
+#errors ul{margin:6px 0 0;padding-left:18px}
+.headline{font-size:17px;line-height:1.75}
+.headline b{color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 4px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--line2);border-radius:10px;padding:10px 12px}
+.kpi .k{font-size:12.5px;color:var(--muted)}
+.kpi .v{font-size:21px;font-weight:700;white-space:nowrap}
+.kpi .u{font-size:12px;color:var(--muted);font-weight:400}
+.kpi.hi{background:var(--accent-soft)}
+.kpi.hi .v{color:var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;background:#fff}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+th{background:var(--line2);font-weight:600;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.fixed{table-layout:fixed}
+td.blank{color:var(--blank);font-style:italic}
+tbody tr:last-child td{border-bottom:0}
+tr.sighead td{background:#f7fafc;font-weight:600;color:var(--muted)}
+table td.pose{white-space:nowrap}
+table td.note{white-space:normal;min-width:190px}
+.legend{color:var(--muted);font-size:12.5px;margin-top:8px}
+.sheetbox{display:flex;flex-wrap:wrap;gap:12px}
+.sheet{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px}
+.sheet h4{margin:0 0 8px;font-size:13px;color:var(--muted);font-weight:600}
+.paper{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid #b9c6d1;border-radius:6px;overflow:hidden;background:#fff}
+.paper .cell{padding:10px 6px;text-align:center;font-variant-numeric:tabular-nums;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.paper .cell .n{font-size:19px;font-weight:700}
+.paper .cell .t{font-size:11px;color:var(--muted)}
+.paper .cell.bl{color:var(--blank);background:repeating-linear-gradient(45deg,#fafcfd,#fafcfd 6px,#f1f5f8 6px,#f1f5f8 12px)}
+.paper .cell.bl .n{font-size:13px;font-weight:600;font-style:italic}
+.paper .fold{position:absolute;left:50%;top:0;bottom:0;width:0;border-left:1.5px dashed #c8d3dc}
+.paper .spine{position:absolute;left:50%;top:0;bottom:0;width:0;border-left:3px double #9fb0be}
+.facecap{font-size:12px;color:var(--muted);margin:6px 0 0;text-align:center}
+.advice{margin:0;padding-left:18px}
+.advice li{margin-bottom:7px}
+.advice li::marker{color:var(--accent)}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;font-size:13px}
+.check{display:flex;gap:7px;align-items:flex-start;padding:6px 9px;border-radius:8px;background:var(--line2)}
+.check .dot{flex:0 0 auto;font-weight:700}
+.check.ok .dot{color:var(--ok)}
+.check.no{background:var(--accent-soft)}
+.check.no .dot{color:var(--accent)}
+.limits{font-size:13.5px;color:var(--muted)}
+.limits li{margin-bottom:6px}
+.footnote{color:var(--muted);font-size:12.5px;margin-top:10px}
+.pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent2-soft);color:var(--accent2);margin-left:6px}
+.printonly{display:none}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:#22303c;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+#toast.on{opacity:1}
+@media (max-width:620px){
+  .wrap{padding:14px 12px 56px}
+  header.top h1{font-size:22px}
+  .kpi .v{font-size:19px}
+  .card{padding:13px 12px 15px}
+  .paper .cell .n{font-size:17px}
+}
+@media (max-width:345px){
+  .kpi .v{font-size:17px}
+  .headline{font-size:16px}
+}
+@media print{
+  body{background:#fff}
+  .wrap>header.top,.app>aside.panel,.noprint{display:none!important}
+  .app{display:block}
+  .printonly{display:block}
+  .card{border:0;padding:0;margin:0}
+  .pcard{page-break-after:always;padding:6mm 0}
+  .pcard .ptitle{font-size:12px;color:#555;margin:0 0 3mm}
+  .psheet{display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;height:120mm}
+  .psheet div{display:flex;align-items:center;justify-content:center;font-size:34pt;font-weight:700;border:1px dashed #bbb}
+}
+</style>
+<style id="printStyle"></style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>折手账 · <span>小册子拼版与装订对账台</span></h1>
+  <p>想自己印一本小册子：哪一页印在哪张纸的哪一面、要几张纸、页数不够时白页落在哪、纸厚了内页要不要朝书脊挪几毫米、厚到要分几帖——按对折一次的折手规则算清，并给出可以直接照做的拼版表与打印设置。</p>
+  <div class="meta">纯前端单文件，不联网、不上传；纸张厚度、单价与页数全部由你填写。默认样例与内置场景都是虚构示例。</div>
+</header>
+
+<div class="app">
+  <aside class="panel">
+    <form class="card" id="form" autocomplete="off">
+      <h2>① 输入<span class="tag">改哪一项都立即重算 · 侧栏可在栏内上下滚动</span></h2>
+      <div class="field">
+        <label>成品总页数 <span class="sub">封面封底也算在内，第 1 页是封面</span></label>
+        <input type="text" id="pages" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>纸张规格 <span class="sub">一律横向使用、沿中线对折</span></label>
+        <select id="paper">
+          <option value="A4">A4（297×210 → 成品 148.5×210）</option>
+          <option value="A3">A3（420×297 → 成品 210×297）</option>
+          <option value="B5">B5（250×176 → 成品 125×176）</option>
+          <option value="Letter">Letter（279.4×215.9）</option>
+          <option value="custom">自定义</option>
+        </select>
+      </div>
+      <div class="row2" id="customRow" hidden>
+        <div class="field"><label>纸宽 mm</label><input type="text" id="customW" inputmode="decimal"></div>
+        <div class="field"><label>纸高 mm</label><input type="text" id="customH" inputmode="decimal"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>纸张厚度 mm</label><input type="text" id="thickness" inputmode="decimal"></div>
+        <div class="field"><label>每张纸单价 元</label><input type="text" id="sheetPrice" inputmode="decimal"></div>
+      </div>
+      <div class="field">
+        <label>装订方式 <span class="sub">骑马钉才需要折手拼版</span></label>
+        <div class="seg" id="bindingSeg">
+          <label><input type="radio" name="binding" value="saddle">骑马钉</label>
+          <label><input type="radio" name="binding" value="perfect">胶装</label>
+          <label><input type="radio" name="binding" value="coil">圈装</label>
+        </div>
+      </div>
+      <div id="saddleOnly">
+        <div class="row2">
+          <div class="field"><label>每帖上限 页 <span class="sub">4 的倍数</span></label><input type="text" id="perSig" inputmode="numeric"></div>
+          <div class="field"><label>层厚系数</label>
+            <select id="layer">
+              <option value="2">2（对折后前口两层）</option>
+              <option value="1">1（保守取一层）</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>爬移补偿</label>
+          <div class="seg" id="creepSeg">
+            <label><input type="checkbox" id="creep">按表逐张内移（不裁）</label>
+          </div>
+        </div>
+      </div>
+      <div class="btns">
+        <button type="button" class="primary" id="btnReset">恢复默认</button>
+        <button type="button" id="btnSave">保存到本机</button>
+        <button type="button" id="btnLoad">读取上次</button>
+      </div>
+      <div class="footnote" id="saveState">本机保存只存在这个浏览器里。</div>
+    </form>
+
+    <div class="card noprint">
+      <h2>内置场景<span class="tag">虚构示例</span></h2>
+      <div class="field" style="margin:0">
+        <select id="scenario"></select>
+      </div>
+      <div class="footnote">场景只填入输入，所有数字都由同一套已验算的计算重新算出。</div>
+    </div>
+
+    <div class="card noprint">
+      <h2>拿走结果</h2>
+      <div class="btns">
+        <button type="button" id="btnCsv">CSV</button>
+        <button type="button" id="btnMd">Markdown</button>
+        <button type="button" id="btnJson">JSON 备份</button>
+        <button type="button" id="btnPng">结果卡 PNG</button>
+      </div>
+      <div class="btns" style="margin-top:8px">
+        <button type="button" id="btnPrint">打印视图</button>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)">
+          <input type="checkbox" id="printFaces" checked> 打印视图含第 2 面
+        </label>
+      </div>
+      <div class="footnote">打印视图是真实可 Ctrl+P 的拼版页；实际出纸效果未在本页验证，请先试印一张对折自检。</div>
+    </div>
+  </aside>
+
+  <main class="results">
+    <div id="errors"></div>
+
+    <section class="card noprint" id="resHeadline">
+      <h2>② 结论<span class="tag" id="bindingTag">骑马钉</span></h2>
+      <div class="headline" id="headline"></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="footnote" id="sizeNote"></div>
+    </section>
+
+    <section class="card noprint" id="resSheets">
+      <h2>③ 拼版表<span class="tag" id="sheetTag"></span></h2>
+      <p class="hint" id="sheetHint"></p>
+      <div class="tw">
+        <table id="sheetTable"></table>
+      </div>
+      <div class="legend" id="sheetLegend"></div>
+    </section>
+
+    <section class="card noprint" id="resDiagram">
+      <h2>④ 纸面示意<span class="tag">照这个放页码</span></h2>
+      <p class="hint">虚线是折线（书脊）。第 2 面是翻面后的视角：左右方向对调、上下不变。</p>
+      <div class="sheetbox" id="diagram"></div>
+      <div class="legend" id="diagramNote"></div>
+    </section>
+
+    <section class="card noprint" id="resBinding">
+      <h2>⑤ 装订方式对照<span class="tag">换方式会怎样</span></h2>
+      <div class="tw"><table id="bindingTable"></table></div>
+      <div class="legend">三种方式的页数约束、用纸张数与书脊厚度都按同一份输入重算；「当前」是你选的那一种。窄屏下表格可左右滑动看全列。</div>
+    </section>
+
+    <section class="card noprint" id="resChecklist">
+      <h2>⑥ 打印与装订清单<span class="tag">照着做</span></h2>
+      <ol id="checklist"></ol>
+    </section>
+
+    <section class="card noprint" id="resAdvice">
+      <h2>⑦ 该注意什么</h2>
+      <ul class="advice" id="advice"></ul>
+    </section>
+
+    <section class="card noprint" id="resCheck">
+      <h2>⑧ 结构自检<span class="tag">每次重算都跑</span></h2>
+      <div class="checks" id="checks"></div>
+      <div class="footnote" id="checkNote"></div>
+    </section>
+
+    <section class="card noprint" id="resSens">
+      <h2>⑨ 敏感性<span class="tag">换一个条件会怎样</span></h2>
+      <div class="tw"><table id="sensTable"></table></div>
+      <div class="legend">每一行都是用同一套公式把改动后的输入完整重算一遍，不是按比例估的。窄屏下表格可左右滑动看全列。</div>
+    </section>
+
+    <section class="card noprint" id="resLimits">
+      <h2>⑩ 边界与不算的情形</h2>
+      <ul class="limits" id="limits"></ul>
+    </section>
+
+    <section class="card printonly" id="printArea"></section>
+  </main>
+</div>
+</div>
+<div id="toast"></div>
+<script>/*CORE*/</script>
+<script>/*UI*/</script>
+</body>
+</html>
